@@ -22,17 +22,17 @@ import (
 	testing "k8s.io/client-go/testing"
 )
 
-type FakeKubeflowV1alpha2 struct {
+type FakeAzuremlV1alpha2 struct {
 	*testing.Fake
 }
 
-func (c *FakeKubeflowV1alpha2) MPIJobs(namespace string) v1alpha2.MPIJobInterface {
+func (c *FakeAzuremlV1alpha2) MPIJobs(namespace string) v1alpha2.MPIJobInterface {
 	return &FakeMPIJobs{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *FakeKubeflowV1alpha2) RESTClient() rest.Interface {
+func (c *FakeAzuremlV1alpha2) RESTClient() rest.Interface {
 	var ret *rest.RESTClient
 	return ret
 }

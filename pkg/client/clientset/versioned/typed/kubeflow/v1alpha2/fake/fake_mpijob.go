@@ -28,13 +28,13 @@ import (
 
 // FakeMPIJobs implements MPIJobInterface
 type FakeMPIJobs struct {
-	Fake *FakeKubeflowV1alpha2
+	Fake *FakeAzuremlV1alpha2
 	ns   string
 }
 
-var mpijobsResource = schema.GroupVersionResource{Group: "kubeflow.org", Version: "v1alpha2", Resource: "mpijobs"}
+var mpijobsResource = schema.GroupVersionResource{Group: "azureml.microsoft.com", Version: "v1alpha2", Resource: "mpijobs"}
 
-var mpijobsKind = schema.GroupVersionKind{Group: "kubeflow.org", Version: "v1alpha2", Kind: "MPIJob"}
+var mpijobsKind = schema.GroupVersionKind{Group: "azureml.microsoft.com", Version: "v1alpha2", Kind: "MPIJob"}
 
 // Get takes name of the mPIJob, and returns the corresponding mPIJob object, and an error if there is any.
 func (c *FakeMPIJobs) Get(name string, options v1.GetOptions) (result *v1alpha2.MPIJob, err error) {

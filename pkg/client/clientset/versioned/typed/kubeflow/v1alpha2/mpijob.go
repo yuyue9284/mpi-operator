@@ -54,7 +54,7 @@ type mPIJobs struct {
 }
 
 // newMPIJobs returns a MPIJobs
-func newMPIJobs(c *KubeflowV1alpha2Client, namespace string) *mPIJobs {
+func newMPIJobs(c *AzuremlV1alpha2Client, namespace string) *mPIJobs {
 	return &mPIJobs{
 		client: c.RESTClient(),
 		ns:     namespace,

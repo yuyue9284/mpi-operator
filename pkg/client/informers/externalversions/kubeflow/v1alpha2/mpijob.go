@@ -59,13 +59,13 @@ func NewFilteredMPIJobInformer(client versioned.Interface, namespace string, res
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.KubeflowV1alpha2().MPIJobs(namespace).List(options)
+				return client.AzuremlV1alpha2().MPIJobs(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.KubeflowV1alpha2().MPIJobs(namespace).Watch(options)
+				return client.AzuremlV1alpha2().MPIJobs(namespace).Watch(options)
 			},
 		},
 		&kubeflowv1alpha2.MPIJob{},

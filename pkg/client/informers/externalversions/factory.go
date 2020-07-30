@@ -170,9 +170,9 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
-	Kubeflow() kubeflow.Interface
+	Azureml() kubeflow.Interface
 }
 
-func (f *sharedInformerFactory) Kubeflow() kubeflow.Interface {
+func (f *sharedInformerFactory) Azureml() kubeflow.Interface {
 	return kubeflow.New(f, f.namespace, f.tweakListOptions)
 }

@@ -22,22 +22,22 @@ import (
 	rest "k8s.io/client-go/rest"
 )
 
-type KubeflowV1alpha2Interface interface {
+type AzuremlV1alpha2Interface interface {
 	RESTClient() rest.Interface
 	MPIJobsGetter
 }
 
-// KubeflowV1alpha2Client is used to interact with features provided by the kubeflow.org group.
-type KubeflowV1alpha2Client struct {
+// AzuremlV1alpha2Client is used to interact with features provided by the azureml.microsoft.com group.
+type AzuremlV1alpha2Client struct {
 	restClient rest.Interface
 }
 
-func (c *KubeflowV1alpha2Client) MPIJobs(namespace string) MPIJobInterface {
+func (c *AzuremlV1alpha2Client) MPIJobs(namespace string) MPIJobInterface {
 	return newMPIJobs(c, namespace)
 }
 
-// NewForConfig creates a new KubeflowV1alpha2Client for the given config.
-func NewForConfig(c *rest.Config) (*KubeflowV1alpha2Client, error) {
+// NewForConfig creates a new AzuremlV1alpha2Client for the given config.
+func NewForConfig(c *rest.Config) (*AzuremlV1alpha2Client, error) {
 	config := *c
 	if err := setConfigDefaults(&config); err != nil {
 		return nil, err
@@ -46,12 +46,12 @@ func NewForConfig(c *rest.Config) (*KubeflowV1alpha2Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &KubeflowV1alpha2Client{client}, nil
+	return &AzuremlV1alpha2Client{client}, nil
 }
 
-// NewForConfigOrDie creates a new KubeflowV1alpha2Client for the given config and
+// NewForConfigOrDie creates a new AzuremlV1alpha2Client for the given config and
 // panics if there is an error in the config.
-func NewForConfigOrDie(c *rest.Config) *KubeflowV1alpha2Client {
+func NewForConfigOrDie(c *rest.Config) *AzuremlV1alpha2Client {
 	client, err := NewForConfig(c)
 	if err != nil {
 		panic(err)
@@ -59,9 +59,9 @@ func NewForConfigOrDie(c *rest.Config) *KubeflowV1alpha2Client {
 	return client
 }
 
-// New creates a new KubeflowV1alpha2Client for the given RESTClient.
-func New(c rest.Interface) *KubeflowV1alpha2Client {
-	return &KubeflowV1alpha2Client{c}
+// New creates a new AzuremlV1alpha2Client for the given RESTClient.
+func New(c rest.Interface) *AzuremlV1alpha2Client {
+	return &AzuremlV1alpha2Client{c}
 }
 
 func setConfigDefaults(config *rest.Config) error {
@@ -79,7 +79,7 @@ func setConfigDefaults(config *rest.Config) error {
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *KubeflowV1alpha2Client) RESTClient() rest.Interface {
+func (c *AzuremlV1alpha2Client) RESTClient() rest.Interface {
 	if c == nil {
 		return nil
 	}

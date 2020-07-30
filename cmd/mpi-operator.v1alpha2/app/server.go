@@ -54,7 +54,7 @@ import (
 const (
 	apiVersion                   = "v1alpha2"
 	RecommendedKubeConfigPathEnv = "KUBECONFIG"
-	controllerName               = "mpi-operator"
+	controllerName               = "aml-mpi-operator"
 )
 
 var (
@@ -158,7 +158,7 @@ func Run(opt *options.ServerOption) error {
 			kubeInformerFactory.Apps().V1().StatefulSets(),
 			kubeInformerFactory.Batch().V1().Jobs(),
 			podgroupsInformer,
-			kubeflowInformerFactory.Kubeflow().V1alpha2().MPIJobs(),
+			kubeflowInformerFactory.Azureml().V1alpha2().MPIJobs(),
 			opt.KubectlDeliveryImage,
 			opt.GangSchedulingName)
 
@@ -286,7 +286,7 @@ func createClientSets(config *restclientset.Config) (kubeclientset.Interface, ku
 }
 
 func checkCRDExists(clientset mpijobclientset.Interface, namespace string) bool {
-	_, err := clientset.KubeflowV1alpha2().MPIJobs(namespace).List(metav1.ListOptions{})
+	_, err := clientset.AzuremlV1alpha2().MPIJobs(namespace).List(metav1.ListOptions{})
 
 	if err != nil {
 		klog.Error(err)

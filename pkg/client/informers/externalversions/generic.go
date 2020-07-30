@@ -19,8 +19,6 @@ package externalversions
 import (
 	"fmt"
 
-	v1 "github.com/kubeflow/mpi-operator/pkg/apis/kubeflow/v1"
-	v1alpha1 "github.com/kubeflow/mpi-operator/pkg/apis/kubeflow/v1alpha1"
 	v1alpha2 "github.com/kubeflow/mpi-operator/pkg/apis/kubeflow/v1alpha2"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
@@ -52,17 +50,9 @@ func (f *genericInformer) Lister() cache.GenericLister {
 // TODO extend this to unknown resources with a client pool
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
-	// Group=kubeflow.org, Version=v1
-	case v1.SchemeGroupVersion.WithResource("mpijobs"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Kubeflow().V1().MPIJobs().Informer()}, nil
-
-		// Group=kubeflow.org, Version=v1alpha1
-	case v1alpha1.SchemeGroupVersion.WithResource("mpijobs"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Kubeflow().V1alpha1().MPIJobs().Informer()}, nil
-
-		// Group=kubeflow.org, Version=v1alpha2
+	// Group=azureml.microsoft.com, Version=v1alpha2
 	case v1alpha2.SchemeGroupVersion.WithResource("mpijobs"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Kubeflow().V1alpha2().MPIJobs().Informer()}, nil
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Azureml().V1alpha2().MPIJobs().Informer()}, nil
 
 	}
 

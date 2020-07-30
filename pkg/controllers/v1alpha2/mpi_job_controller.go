@@ -950,7 +950,7 @@ func (c *MPIJobController) handleObject(obj interface{}) {
 
 // doUpdateJobStatus updates the status of the given MPIJob by call apiServer.
 func (c *MPIJobController) doUpdateJobStatus(mpiJob *kubeflow.MPIJob) error {
-	_, err := c.kubeflowClient.KubeflowV1alpha2().MPIJobs(mpiJob.Namespace).UpdateStatus(mpiJob)
+	_, err := c.kubeflowClient.AzuremlV1alpha2().MPIJobs(mpiJob.Namespace).UpdateStatus(mpiJob)
 	return err
 }
 
@@ -1111,7 +1111,7 @@ func newPodGroup(mpiJob *kubeflow.MPIJob, minAvailableReplicas int32) *podgroupv
 // discover the MPIJob resource that 'owns' it.
 func newWorker(mpiJob *kubeflow.MPIJob, desiredReplicas int32, gangSchedulerName string) *appsv1.StatefulSet {
 	labels := map[string]string{
-		labelGroupName:   "kubeflow.org",
+		labelGroupName:   "azureml.microsoft.com",
 		labelMPIJobName:  mpiJob.Name,
 		labelMPIRoleType: worker,
 	}
@@ -1207,7 +1207,7 @@ func newWorker(mpiJob *kubeflow.MPIJob, desiredReplicas int32, gangSchedulerName
 func (c *MPIJobController) newLauncher(mpiJob *kubeflow.MPIJob, kubectlDeliveryImage string) *batchv1.Job {
 	launcherName := mpiJob.Name + launcherSuffix
 	labels := map[string]string{
-		labelGroupName:   "kubeflow.org",
+		labelGroupName:   "azureml.microsoft.com",
 		labelMPIJobName:  mpiJob.Name,
 		labelMPIRoleType: launcher,
 	}
