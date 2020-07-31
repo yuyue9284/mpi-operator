@@ -29,59 +29,59 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 )
 
-// MPIJobInformer provides access to a shared informer and lister for
-// MPIJobs.
-type MPIJobInformer interface {
+// AmlMPIJobInformer provides access to a shared informer and lister for
+// AmlMPIJobs.
+type AmlMPIJobInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha2.MPIJobLister
+	Lister() v1alpha2.AmlMPIJobLister
 }
 
-type mPIJobInformer struct {
+type amlMPIJobInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewMPIJobInformer constructs a new informer for MPIJob type.
+// NewAmlMPIJobInformer constructs a new informer for AmlMPIJob type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewMPIJobInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredMPIJobInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewAmlMPIJobInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredAmlMPIJobInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredMPIJobInformer constructs a new informer for MPIJob type.
+// NewFilteredAmlMPIJobInformer constructs a new informer for AmlMPIJob type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredMPIJobInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredAmlMPIJobInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.AzuremlV1alpha2().MPIJobs(namespace).List(options)
+				return client.AzuremlV1alpha2().AmlMPIJobs(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.AzuremlV1alpha2().MPIJobs(namespace).Watch(options)
+				return client.AzuremlV1alpha2().AmlMPIJobs(namespace).Watch(options)
 			},
 		},
-		&kubeflowv1alpha2.MPIJob{},
+		&kubeflowv1alpha2.AmlMPIJob{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *mPIJobInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredMPIJobInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *amlMPIJobInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredAmlMPIJobInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *mPIJobInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&kubeflowv1alpha2.MPIJob{}, f.defaultInformer)
+func (f *amlMPIJobInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&kubeflowv1alpha2.AmlMPIJob{}, f.defaultInformer)
 }
 
-func (f *mPIJobInformer) Lister() v1alpha2.MPIJobLister {
-	return v1alpha2.NewMPIJobLister(f.Informer().GetIndexer())
+func (f *amlMPIJobInformer) Lister() v1alpha2.AmlMPIJobLister {
+	return v1alpha2.NewAmlMPIJobLister(f.Informer().GetIndexer())
 }

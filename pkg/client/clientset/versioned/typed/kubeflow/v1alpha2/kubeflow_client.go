@@ -24,7 +24,7 @@ import (
 
 type AzuremlV1alpha2Interface interface {
 	RESTClient() rest.Interface
-	MPIJobsGetter
+	AmlMPIJobsGetter
 }
 
 // AzuremlV1alpha2Client is used to interact with features provided by the azureml.microsoft.com group.
@@ -32,8 +32,8 @@ type AzuremlV1alpha2Client struct {
 	restClient rest.Interface
 }
 
-func (c *AzuremlV1alpha2Client) MPIJobs(namespace string) MPIJobInterface {
-	return newMPIJobs(c, namespace)
+func (c *AzuremlV1alpha2Client) AmlMPIJobs(namespace string) AmlMPIJobInterface {
+	return newAmlMPIJobs(c, namespace)
 }
 
 // NewForConfig creates a new AzuremlV1alpha2Client for the given config.

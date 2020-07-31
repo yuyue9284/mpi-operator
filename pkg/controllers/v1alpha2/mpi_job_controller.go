@@ -145,7 +145,7 @@ type MPIJobController struct {
 	jobSynced            cache.InformerSynced
 	podgroupsLister      podgroupslists.PodGroupLister
 	podgroupsSynced      cache.InformerSynced
-	mpiJobLister         listers.MPIJobLister
+	mpiJobLister         listers.AmlMPIJobLister
 	mpiJobSynced         cache.InformerSynced
 
 	// queue is a rate limited work queue. This is used to queue work to be
@@ -163,7 +163,7 @@ type MPIJobController struct {
 	gangSchedulerName string
 
 	// To allow injection of updateStatus for testing.
-	updateStatusHandler func(mpijob *kubeflow.MPIJob) error
+	updateStatusHandler func(mpijob *kubeflow.AmlMPIJob) error
 }
 
 // NewMPIJobController returns a new MPIJob controller.
@@ -178,7 +178,7 @@ func NewMPIJobController(
 	statefulSetInformer appsinformers.StatefulSetInformer,
 	jobInformer batchinformers.JobInformer,
 	podgroupsInformer podgroupsinformer.PodGroupInformer,
-	mpiJobInformer informers.MPIJobInformer,
+	mpiJobInformer informers.AmlMPIJobInformer,
 	kubectlDeliveryImage string,
 	gangSchedulerName string) *MPIJobController {
 
@@ -466,7 +466,7 @@ func (c *MPIJobController) syncHandler(key string) error {
 	}
 
 	// Get the MPIJob with this namespace/name.
-	sharedJob, err := c.mpiJobLister.MPIJobs(namespace).Get(name)
+	sharedJob, err := c.mpiJobLister.AmlMPIJobs(namespace).Get(name)
 	if err != nil {
 		// The MPIJob may no longer exist, in which case we stop processing.
 		if errors.IsNotFound(err) {
@@ -577,7 +577,7 @@ func (c *MPIJobController) syncHandler(key string) error {
 }
 
 // getLauncherJob gets the launcher Job controlled by this MPIJob.
-func (c *MPIJobController) getLauncherJob(mpiJob *kubeflow.MPIJob) (*batchv1.Job, error) {
+func (c *MPIJobController) getLauncherJob(mpiJob *kubeflow.AmlMPIJob) (*batchv1.Job, error) {
 	launcher, err := c.jobLister.Jobs(mpiJob.Namespace).Get(mpiJob.Name + launcherSuffix)
 	if errors.IsNotFound(err) {
 		return nil, nil
@@ -601,7 +601,7 @@ func (c *MPIJobController) getLauncherJob(mpiJob *kubeflow.MPIJob) (*batchv1.Job
 }
 
 // getOrCreatePodGroups will create a PodGroup for gang scheduling by kube-batch.
-func (c *MPIJobController) getOrCreatePodGroups(mpiJob *kubeflow.MPIJob, minAvailableWorkerReplicas int32) (*podgroupv1alpha1.PodGroup, error) {
+func (c *MPIJobController) getOrCreatePodGroups(mpiJob *kubeflow.AmlMPIJob, minAvailableWorkerReplicas int32) (*podgroupv1alpha1.PodGroup, error) {
 	podgroup, err := c.podgroupsLister.PodGroups(mpiJob.Namespace).Get(mpiJob.Name)
 	// If the PodGroup doesn't exist, we'll create it.
 	if errors.IsNotFound(err) {
@@ -625,7 +625,7 @@ func (c *MPIJobController) getOrCreatePodGroups(mpiJob *kubeflow.MPIJob, minAvai
 }
 
 // deletePodGroups will delete a PodGroup when MPIJob have done.
-func (c *MPIJobController) deletePodGroups(mpiJob *kubeflow.MPIJob) error {
+func (c *MPIJobController) deletePodGroups(mpiJob *kubeflow.AmlMPIJob) error {
 	podgroup, err := c.podgroupsLister.PodGroups(mpiJob.Namespace).Get(mpiJob.Name)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -656,7 +656,7 @@ func (c *MPIJobController) deletePodGroups(mpiJob *kubeflow.MPIJob) error {
 
 // getOrCreateConfigMap gets the ConfigMap controlled by this MPIJob, or creates
 // one if it doesn't exist.
-func (c *MPIJobController) getOrCreateConfigMap(mpiJob *kubeflow.MPIJob, workerReplicas int32) (*corev1.ConfigMap, error) {
+func (c *MPIJobController) getOrCreateConfigMap(mpiJob *kubeflow.AmlMPIJob, workerReplicas int32) (*corev1.ConfigMap, error) {
 	cm, err := c.configMapLister.ConfigMaps(mpiJob.Namespace).Get(mpiJob.Name + configSuffix)
 	// If the ConfigMap doesn't exist, we'll create it.
 	if errors.IsNotFound(err) {
@@ -681,7 +681,7 @@ func (c *MPIJobController) getOrCreateConfigMap(mpiJob *kubeflow.MPIJob, workerR
 
 // getOrCreateLauncherServiceAccount gets the launcher ServiceAccount controlled
 // by this MPIJob, or creates one if it doesn't exist.
-func (c *MPIJobController) getOrCreateLauncherServiceAccount(mpiJob *kubeflow.MPIJob) (*corev1.ServiceAccount, error) {
+func (c *MPIJobController) getOrCreateLauncherServiceAccount(mpiJob *kubeflow.AmlMPIJob) (*corev1.ServiceAccount, error) {
 	sa, err := c.serviceAccountLister.ServiceAccounts(mpiJob.Namespace).Get(mpiJob.Name + launcherSuffix)
 	// If the ServiceAccount doesn't exist, we'll create it.
 	if errors.IsNotFound(err) {
@@ -705,7 +705,7 @@ func (c *MPIJobController) getOrCreateLauncherServiceAccount(mpiJob *kubeflow.MP
 }
 
 // getOrCreateLauncherRole gets the launcher Role controlled by this MPIJob.
-func (c *MPIJobController) getOrCreateLauncherRole(mpiJob *kubeflow.MPIJob, workerReplicas int32) (*rbacv1.Role, error) {
+func (c *MPIJobController) getOrCreateLauncherRole(mpiJob *kubeflow.AmlMPIJob, workerReplicas int32) (*rbacv1.Role, error) {
 	role, err := c.roleLister.Roles(mpiJob.Namespace).Get(mpiJob.Name + launcherSuffix)
 	// If the Role doesn't exist, we'll create it.
 	if errors.IsNotFound(err) {
@@ -730,7 +730,7 @@ func (c *MPIJobController) getOrCreateLauncherRole(mpiJob *kubeflow.MPIJob, work
 
 // getLauncherRoleBinding gets the launcher RoleBinding controlled by this
 // MPIJob, or creates one if it doesn't exist.
-func (c *MPIJobController) getLauncherRoleBinding(mpiJob *kubeflow.MPIJob) (*rbacv1.RoleBinding, error) {
+func (c *MPIJobController) getLauncherRoleBinding(mpiJob *kubeflow.AmlMPIJob) (*rbacv1.RoleBinding, error) {
 	rb, err := c.roleBindingLister.RoleBindings(mpiJob.Namespace).Get(mpiJob.Name + launcherSuffix)
 	// If the RoleBinding doesn't exist, we'll create it.
 	if errors.IsNotFound(err) {
@@ -755,7 +755,7 @@ func (c *MPIJobController) getLauncherRoleBinding(mpiJob *kubeflow.MPIJob) (*rba
 
 // getOrCreateWorkerStatefulSet gets the worker StatefulSet controlled by this
 // MPIJob, or creates one if it doesn't exist.
-func (c *MPIJobController) getOrCreateWorkerStatefulSet(mpiJob *kubeflow.MPIJob, workerReplicas int32) (*appsv1.StatefulSet, error) {
+func (c *MPIJobController) getOrCreateWorkerStatefulSet(mpiJob *kubeflow.AmlMPIJob, workerReplicas int32) (*appsv1.StatefulSet, error) {
 	worker, err := c.statefulSetLister.StatefulSets(mpiJob.Namespace).Get(mpiJob.Name + workerSuffix)
 	// If the StatefulSet doesn't exist, we'll create it.
 	if errors.IsNotFound(err) && workerReplicas > 0 {
@@ -804,7 +804,7 @@ func (c *MPIJobController) getOrCreateWorkerStatefulSet(mpiJob *kubeflow.MPIJob,
 	return worker, nil
 }
 
-func (c *MPIJobController) updateMPIJobStatus(mpiJob *kubeflow.MPIJob, launcher *batchv1.Job, worker *appsv1.StatefulSet) error {
+func (c *MPIJobController) updateMPIJobStatus(mpiJob *kubeflow.AmlMPIJob, launcher *batchv1.Job, worker *appsv1.StatefulSet) error {
 	oldStatus := mpiJob.Status.DeepCopy()
 	if launcher != nil {
 		initializeMPIJobStatuses(mpiJob, kubeflow.MPIReplicaTypeLauncher)
@@ -873,7 +873,7 @@ func (c *MPIJobController) updateMPIJobStatus(mpiJob *kubeflow.MPIJob, launcher 
 
 // When a mpiJob is added, set the defaults and enqueue the current mpiJob.
 func (c *MPIJobController) addMPIJob(obj interface{}) {
-	mpiJob := obj.(*kubeflow.MPIJob)
+	mpiJob := obj.(*kubeflow.AmlMPIJob)
 
 	// Set default for the new mpiJob.
 	scheme.Scheme.Default(mpiJob)
@@ -937,7 +937,7 @@ func (c *MPIJobController) handleObject(obj interface{}) {
 			return
 		}
 
-		mpiJob, err := c.mpiJobLister.MPIJobs(object.GetNamespace()).Get(ownerRef.Name)
+		mpiJob, err := c.mpiJobLister.AmlMPIJobs(object.GetNamespace()).Get(ownerRef.Name)
 		if err != nil {
 			klog.V(4).Infof("ignoring orphaned object '%s' of mpi job '%s'", object.GetSelfLink(), ownerRef.Name)
 			return
@@ -949,15 +949,15 @@ func (c *MPIJobController) handleObject(obj interface{}) {
 }
 
 // doUpdateJobStatus updates the status of the given MPIJob by call apiServer.
-func (c *MPIJobController) doUpdateJobStatus(mpiJob *kubeflow.MPIJob) error {
-	_, err := c.kubeflowClient.AzuremlV1alpha2().MPIJobs(mpiJob.Namespace).UpdateStatus(mpiJob)
+func (c *MPIJobController) doUpdateJobStatus(mpiJob *kubeflow.AmlMPIJob) error {
+	_, err := c.kubeflowClient.AzuremlV1alpha2().AmlMPIJobs(mpiJob.Namespace).UpdateStatus(mpiJob)
 	return err
 }
 
 // newConfigMap creates a new ConfigMap containing configurations for an MPIJob
 // resource. It also sets the appropriate OwnerReferences on the resource so
 // handleObject can discover the MPIJob resource that 'owns' it.
-func newConfigMap(mpiJob *kubeflow.MPIJob, workerReplicas int32) *corev1.ConfigMap {
+func newConfigMap(mpiJob *kubeflow.AmlMPIJob, workerReplicas int32) *corev1.ConfigMap {
 	kubexec := fmt.Sprintf(`#!/bin/sh
 set -x
 POD_NAME=$1
@@ -999,7 +999,7 @@ shift
 // newLauncherServiceAccount creates a new launcher ServiceAccount for an MPIJob
 // resource. It also sets the appropriate OwnerReferences on the resource so
 // handleObject can discover the MPIJob resource that 'owns' it.
-func newLauncherServiceAccount(mpiJob *kubeflow.MPIJob) *corev1.ServiceAccount {
+func newLauncherServiceAccount(mpiJob *kubeflow.AmlMPIJob) *corev1.ServiceAccount {
 	return &corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      mpiJob.Name + launcherSuffix,
@@ -1017,7 +1017,7 @@ func newLauncherServiceAccount(mpiJob *kubeflow.MPIJob) *corev1.ServiceAccount {
 // newLauncherRole creates a new launcher Role for an MPIJob resource. It also
 // sets the appropriate OwnerReferences on the resource so handleObject can
 // discover the MPIJob resource that 'owns' it.
-func newLauncherRole(mpiJob *kubeflow.MPIJob, workerReplicas int32) *rbacv1.Role {
+func newLauncherRole(mpiJob *kubeflow.AmlMPIJob, workerReplicas int32) *rbacv1.Role {
 	var podNames []string
 	for i := 0; i < int(workerReplicas); i++ {
 		podNames = append(podNames, fmt.Sprintf("%s%s-%d", mpiJob.Name, workerSuffix, i))
@@ -1052,7 +1052,7 @@ func newLauncherRole(mpiJob *kubeflow.MPIJob, workerReplicas int32) *rbacv1.Role
 // newLauncherRoleBinding creates a new launcher RoleBinding for an MPIJob
 // resource. It also sets the appropriate OwnerReferences on the resource so
 // handleObject can discover the MPIJob resource that 'owns' it.
-func newLauncherRoleBinding(mpiJob *kubeflow.MPIJob) *rbacv1.RoleBinding {
+func newLauncherRoleBinding(mpiJob *kubeflow.AmlMPIJob) *rbacv1.RoleBinding {
 	launcherName := mpiJob.Name + launcherSuffix
 	return &rbacv1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
@@ -1083,7 +1083,7 @@ func newLauncherRoleBinding(mpiJob *kubeflow.MPIJob) *rbacv1.RoleBinding {
 // newPodGroup creates a new PodGroup for an MPIJob
 // resource. It also sets the appropriate OwnerReferences on the resource so
 // handleObject can discover the MPIJob resource that 'owns' it.
-func newPodGroup(mpiJob *kubeflow.MPIJob, minAvailableReplicas int32) *podgroupv1alpha1.PodGroup {
+func newPodGroup(mpiJob *kubeflow.AmlMPIJob, minAvailableReplicas int32) *podgroupv1alpha1.PodGroup {
 	var pName string
 	if l := mpiJob.Spec.MPIReplicaSpecs[kubeflow.MPIReplicaTypeLauncher]; l != nil {
 		pName = l.Template.Spec.PriorityClassName
@@ -1109,7 +1109,7 @@ func newPodGroup(mpiJob *kubeflow.MPIJob, minAvailableReplicas int32) *podgroupv
 // newWorker creates a new worker StatefulSet for an MPIJob resource. It also
 // sets the appropriate OwnerReferences on the resource so handleObject can
 // discover the MPIJob resource that 'owns' it.
-func newWorker(mpiJob *kubeflow.MPIJob, desiredReplicas int32, gangSchedulerName string) *appsv1.StatefulSet {
+func newWorker(mpiJob *kubeflow.AmlMPIJob, desiredReplicas int32, gangSchedulerName string) *appsv1.StatefulSet {
 	labels := map[string]string{
 		labelGroupName:   "azureml.microsoft.com",
 		labelMPIJobName:  mpiJob.Name,
@@ -1204,7 +1204,7 @@ func newWorker(mpiJob *kubeflow.MPIJob, desiredReplicas int32, gangSchedulerName
 // newLauncher creates a new launcher Job for an MPIJob resource. It also sets
 // the appropriate OwnerReferences on the resource so handleObject can discover
 // the MPIJob resource that 'owns' it.
-func (c *MPIJobController) newLauncher(mpiJob *kubeflow.MPIJob, kubectlDeliveryImage string) *batchv1.Job {
+func (c *MPIJobController) newLauncher(mpiJob *kubeflow.AmlMPIJob, kubectlDeliveryImage string) *batchv1.Job {
 	launcherName := mpiJob.Name + launcherSuffix
 	labels := map[string]string{
 		labelGroupName:   "azureml.microsoft.com",

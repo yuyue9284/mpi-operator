@@ -22,8 +22,8 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
-	// MPIJobs returns a MPIJobInformer.
-	MPIJobs() MPIJobInformer
+	// AmlMPIJobs returns a AmlMPIJobInformer.
+	AmlMPIJobs() AmlMPIJobInformer
 }
 
 type version struct {
@@ -37,7 +37,7 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
-// MPIJobs returns a MPIJobInformer.
-func (v *version) MPIJobs() MPIJobInformer {
-	return &mPIJobInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+// AmlMPIJobs returns a AmlMPIJobInformer.
+func (v *version) AmlMPIJobs() AmlMPIJobInformer {
+	return &amlMPIJobInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

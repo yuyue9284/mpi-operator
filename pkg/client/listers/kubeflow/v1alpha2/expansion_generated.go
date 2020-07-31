@@ -16,10 +16,10 @@
 
 package v1alpha2
 
-// MPIJobListerExpansion allows custom methods to be added to
-// MPIJobLister.
-type MPIJobListerExpansion interface{}
+// AmlMPIJobListerExpansion allows custom methods to be added to
+// AmlMPIJobLister.
+type AmlMPIJobListerExpansion interface{}
 
-// MPIJobNamespaceListerExpansion allows custom methods to be added to
-// MPIJobNamespaceLister.
-type MPIJobNamespaceListerExpansion interface{}
+// AmlMPIJobNamespaceListerExpansion allows custom methods to be added to
+// AmlMPIJobNamespaceLister.
+type AmlMPIJobNamespaceListerExpansion interface{}

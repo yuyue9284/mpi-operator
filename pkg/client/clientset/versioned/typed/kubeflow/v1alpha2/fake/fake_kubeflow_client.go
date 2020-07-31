@@ -26,8 +26,8 @@ type FakeAzuremlV1alpha2 struct {
 	*testing.Fake
 }
 
-func (c *FakeAzuremlV1alpha2) MPIJobs(namespace string) v1alpha2.MPIJobInterface {
-	return &FakeMPIJobs{c, namespace}
+func (c *FakeAzuremlV1alpha2) AmlMPIJobs(namespace string) v1alpha2.AmlMPIJobInterface {
+	return &FakeAmlMPIJobs{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

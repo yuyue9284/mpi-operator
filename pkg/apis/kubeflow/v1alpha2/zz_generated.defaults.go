@@ -26,18 +26,18 @@ import (
 // Public to allow building arbitrary schemes.
 // All generated defaulters are covering - they call all nested defaulters.
 func RegisterDefaults(scheme *runtime.Scheme) error {
-	scheme.AddTypeDefaultingFunc(&MPIJob{}, func(obj interface{}) { SetObjectDefaults_MPIJob(obj.(*MPIJob)) })
-	scheme.AddTypeDefaultingFunc(&MPIJobList{}, func(obj interface{}) { SetObjectDefaults_MPIJobList(obj.(*MPIJobList)) })
+	scheme.AddTypeDefaultingFunc(&AmlMPIJob{}, func(obj interface{}) { SetObjectDefaults_AmlMPIJob(obj.(*AmlMPIJob)) })
+	scheme.AddTypeDefaultingFunc(&AmlMPIJobList{}, func(obj interface{}) { SetObjectDefaults_AmlMPIJobList(obj.(*AmlMPIJobList)) })
 	return nil
 }
 
-func SetObjectDefaults_MPIJob(in *MPIJob) {
-	SetDefaults_MPIJob(in)
+func SetObjectDefaults_AmlMPIJob(in *AmlMPIJob) {
+	SetDefaults_AmlMPIJob(in)
 }
 
-func SetObjectDefaults_MPIJobList(in *MPIJobList) {
+func SetObjectDefaults_AmlMPIJobList(in *AmlMPIJobList) {
 	for i := range in.Items {
 		a := &in.Items[i]
-		SetObjectDefaults_MPIJob(a)
+		SetObjectDefaults_AmlMPIJob(a)
 	}
 }

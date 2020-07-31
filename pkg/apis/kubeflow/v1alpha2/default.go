@@ -43,7 +43,7 @@ func setDefaultsTypeLauncher(spec *common.ReplicaSpec) {
 func setDefaultsTypeWorker(spec *common.ReplicaSpec) {
 }
 
-func SetDefaults_MPIJob(mpiJob *MPIJob) {
+func SetDefaults_AmlMPIJob(mpiJob *AmlMPIJob) {
 	// set default BackoffLimit
 	if mpiJob.Spec.BackoffLimit == nil {
 		mpiJob.Spec.BackoffLimit = new(int32)

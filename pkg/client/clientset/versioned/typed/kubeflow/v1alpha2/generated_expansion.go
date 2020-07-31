@@ -16,4 +16,4 @@
 
 package v1alpha2
 
-type MPIJobExpansion interface{}
+type AmlMPIJobExpansion interface{}

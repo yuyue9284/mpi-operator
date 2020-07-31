@@ -66,7 +66,7 @@ type fixture struct {
 	statefulSetLister    []*appsv1.StatefulSet
 	jobLister            []*batchv1.Job
 	podGroupLister       []*podgroupv1alpha1.PodGroup
-	mpiJobLister         []*kubeflow.MPIJob
+	mpiJobLister         []*kubeflow.AmlMPIJob
 
 	// Actions expected to happen on the client.
 	kubeActions []core.Action
@@ -85,9 +85,9 @@ func newFixture(t *testing.T) *fixture {
 	return f
 }
 
-func newMPIJobCommon(name string, startTime, completionTime *metav1.Time) *kubeflow.MPIJob {
+func newMPIJobCommon(name string, startTime, completionTime *metav1.Time) *kubeflow.AmlMPIJob {
 	cleanPodPolicyAll := common.CleanPodPolicyAll
-	mpiJob := &kubeflow.MPIJob{
+	mpiJob := &kubeflow.AmlMPIJob{
 		TypeMeta: metav1.TypeMeta{APIVersion: kubeflow.SchemeGroupVersion.String()},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -135,7 +135,7 @@ func newMPIJobCommon(name string, startTime, completionTime *metav1.Time) *kubef
 	return mpiJob
 }
 
-func newMPIJob(name string, replicas *int32, pusPerReplica int64, resourceName string, startTime, completionTime *metav1.Time) *kubeflow.MPIJob {
+func newMPIJob(name string, replicas *int32, pusPerReplica int64, resourceName string, startTime, completionTime *metav1.Time) *kubeflow.AmlMPIJob {
 	mpiJob := newMPIJobCommon(name, startTime, completionTime)
 
 	mpiJob.Spec.MPIReplicaSpecs[kubeflow.MPIReplicaTypeWorker].Replicas = replicas
@@ -174,7 +174,7 @@ func (f *fixture) newController(gangSchedulerName string) (*MPIJobController, in
 		k8sI.Apps().V1().StatefulSets(),
 		k8sI.Batch().V1().Jobs(),
 		podgroupsInformer,
-		i.Azureml().V1alpha2().MPIJobs(),
+		i.Azureml().V1alpha2().AmlMPIJobs(),
 		"kubectl-delivery",
 		gangSchedulerName,
 	)
@@ -239,7 +239,7 @@ func (f *fixture) newController(gangSchedulerName string) (*MPIJobController, in
 	}
 
 	for _, mpiJob := range f.mpiJobLister {
-		err := i.Azureml().V1alpha2().MPIJobs().Informer().GetIndexer().Add(mpiJob)
+		err := i.Azureml().V1alpha2().AmlMPIJobs().Informer().GetIndexer().Add(mpiJob)
 		if err != nil {
 			fmt.Println("Failed to create mpijob")
 		}
@@ -323,8 +323,8 @@ func checkAction(expected, actual core.Action, t *testing.T) {
 		expObject := e.GetObject()
 		object := a.GetObject()
 
-		expMPIJob, ok1 := expObject.(*kubeflow.MPIJob)
-		gotMPIJob, ok2 := object.(*kubeflow.MPIJob)
+		expMPIJob, ok1 := expObject.(*kubeflow.AmlMPIJob)
+		gotMPIJob, ok2 := object.(*kubeflow.AmlMPIJob)
 		if ok1 && ok2 {
 			clearConditionTime(expMPIJob)
 			clearConditionTime(gotMPIJob)
@@ -402,13 +402,13 @@ func (f *fixture) expectCreateJobAction(d *batchv1.Job) {
 	f.kubeActions = append(f.kubeActions, core.NewCreateAction(schema.GroupVersionResource{Resource: "jobs"}, d.Namespace, d))
 }
 
-func (f *fixture) expectUpdateMPIJobStatusAction(mpiJob *kubeflow.MPIJob) {
+func (f *fixture) expectUpdateMPIJobStatusAction(mpiJob *kubeflow.AmlMPIJob) {
 	action := core.NewUpdateAction(schema.GroupVersionResource{Resource: "mpijobs"}, mpiJob.Namespace, mpiJob)
 	action.Subresource = "status"
 	f.actions = append(f.actions, action)
 }
 
-func (f *fixture) setUpMPIJob(mpiJob *kubeflow.MPIJob) {
+func (f *fixture) setUpMPIJob(mpiJob *kubeflow.AmlMPIJob) {
 	f.mpiJobLister = append(f.mpiJobLister, mpiJob)
 	f.objects = append(f.objects, mpiJob)
 }
@@ -443,7 +443,7 @@ func (f *fixture) setUpRoleBinding(roleBinding *rbacv1.RoleBinding) {
 	f.kubeObjects = append(f.kubeObjects, roleBinding)
 }
 
-func (f *fixture) setUpRbac(mpiJob *kubeflow.MPIJob, workerReplicas int32) {
+func (f *fixture) setUpRbac(mpiJob *kubeflow.AmlMPIJob, workerReplicas int32) {
 	serviceAccount := newLauncherServiceAccount(mpiJob)
 	f.setUpServiceAccount(serviceAccount)
 
@@ -454,7 +454,7 @@ func (f *fixture) setUpRbac(mpiJob *kubeflow.MPIJob, workerReplicas int32) {
 	f.setUpRoleBinding(roleBinding)
 }
 
-func setUpMPIJobTimestamp(mpiJob *kubeflow.MPIJob, startTime, completionTime *metav1.Time) {
+func setUpMPIJobTimestamp(mpiJob *kubeflow.AmlMPIJob, startTime, completionTime *metav1.Time) {
 	if startTime != nil {
 		mpiJob.Status.StartTime = startTime
 	}
@@ -464,7 +464,7 @@ func setUpMPIJobTimestamp(mpiJob *kubeflow.MPIJob, startTime, completionTime *me
 	}
 }
 
-func clearConditionTime(mpiJob *kubeflow.MPIJob) {
+func clearConditionTime(mpiJob *kubeflow.AmlMPIJob) {
 	var clearConditions []common.JobCondition
 	for _, condition := range mpiJob.Status.Conditions {
 		condition.LastTransitionTime = metav1.Time{}
@@ -474,7 +474,7 @@ func clearConditionTime(mpiJob *kubeflow.MPIJob) {
 	mpiJob.Status.Conditions = clearConditions
 }
 
-func getKey(mpiJob *kubeflow.MPIJob, t *testing.T) string {
+func getKey(mpiJob *kubeflow.AmlMPIJob, t *testing.T) string {
 	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(mpiJob)
 	if err != nil {
 		t.Errorf("Unexpected error getting key for mpi job %v: %v", mpiJob.Name, err)
